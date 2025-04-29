@@ -1,11 +1,26 @@
+using WebApi.Models;
+using WebApi.Infraestrutura;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Adicione o serviço de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MinhaPoliticaCors", policy =>
+    {
+        policy.WithOrigins("http://127.0.0.1:5500") // <-- seu front-end
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
+// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<IRepositorioFuncionario, RepositorioFuncionario>();
+builder.Services.AddDbContext<ConnectionContext>();
 
 var app = builder.Build();
 
@@ -15,6 +30,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Use CORS antes da autorização
+app.UseCors("MinhaPoliticaCors");
 
 app.UseHttpsRedirection();
 
